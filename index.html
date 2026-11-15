@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سازنده و ویرایشگر قالب رنگ VS Code</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --app-bg: #0f1117;
+      --app-surface: #171a23;
+      --app-surface-2: #1f2430;
+      --app-border: #2c3344;
+      --app-text: #e6edf3;
+      --app-text-muted: #9aa4b8;
+      --app-accent: #3b82f6;
+      --app-accent-hover: #2563eb;
+      --app-success: #10b981;
+      --app-font-fa: "Vazirmatn", Tahoma, sans-serif;
+      --app-font-en: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      --mono-font: "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+	  --radius-sm: 2px;
+	  --radius-md: 4px;
+	  --radius-lg: 8px;
+
+      /* Live VS Code Theme Variables */
+      --vs-title-bg: #181818;
+      --vs-title-fg: #cccccc;
+      --vs-activity-bg: #181818;
+      --vs-activity-fg: #ffffff;
+      --vs-activity-inactive-fg: #858585;
+      --vs-badge-bg: #0078d4;
+      --vs-badge-fg: #ffffff;
+      --vs-sidebar-bg: #181818;
+      --vs-sidebar-fg: #cccccc;
+      --vs-sidebar-title-fg: #bbbbbb;
+      --vs-sidebar-header-bg: #222222;
+      --vs-sidebar-border: #2b2b2b;
+      --vs-list-active-bg: #04395e;
+      --vs-list-active-fg: #ffffff;
+      --vs-list-hover-bg: #2a2d2e;
+      --vs-tabs-bg: #181818;
+      --vs-tab-active-bg: #1f1f1f;
+      --vs-tab-active-fg: #ffffff;
+      --vs-tab-active-border: #0078d4;
+      --vs-tab-inactive-bg: #181818;
+      --vs-tab-inactive-fg: #9d9d9d;
+      --vs-tab-border: #6c757d49;
+      --vs-editor-bg: #1f1f1f;
+      --vs-editor-fg: #cccccc;
+      --vs-linenum-fg: #6e7681;
+      --vs-linenum-active-fg: #cccccc;
+      --vs-line-highlight: #2a2d2e80;
+      --vs-selection-bg: #264f78aa;
+      --vs-cursor-fg: #aeafad;
+      --vs-tok-comment: #6a9955;
+      --vs-tok-keyword: #569cd6;
+      --vs-tok-string: #ce9178;
+      --vs-tok-function: #dcdcaa;
+      --vs-tok-type: #4ec9b0;
+      --vs-tok-variable: #9cdcfe;
+      --vs-tok-number: #b5cea8;
+      --vs-panel-bg: #181818;
+      --vs-panel-border: #2b2b2b;
+      --vs-panel-title-fg: #e7e7e7;
+      --vs-panel-title-border: #0078d4;
+      --vs-term-bg: #181818;
+      --vs-term-fg: #cccccc;
+      --vs-status-bg: #181818;
+      --vs-status-fg: #cccccc;
+      --vs-status-remote-bg: #0078d4;
+      --vs-status-remote-fg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html[lang="fa"] body {
+      font-family: var(--app-font-fa);
+    }
+
+    html[lang="en"] body {
+      font-family: var(--app-font-en);
+    }
+
+    body {
+      background: var(--app-bg);
+      color: var(--app-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+	  overflow-y: hidden;
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    /* Top App Header */
+    .app-header {
+      background: var(--app-surface);
+      border-bottom: 1px solid var(--app-border);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0078d4, #00b7c3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .brand-text p {
+      font-size: 12px;
+      color: var(--app-text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .preset-select {
+      background: var(--app-surface-2);
+      color: var(--app-text);
+      border: 1px solid var(--app-border);
+      padding: 7px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .preset-select:focus {
+      border-color: var(--app-accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--app-border);
+      background: var(--app-surface-2);
+      color: var(--app-text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #282f3f;
+      border-color: #3e4860;
+    }
+
+    .btn-primary {
+      background: var(--app-accent);
+      border-color: var(--app-accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--app-accent-hover);
+      border-color: var(--app-accent-hover);
+    }
+
+    .btn-success {
+      background: var(--app-success);
+      border-color: var(--app-success);
+      color: #fff;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      flex: 1;
+      min-height: calc(100vh - 61px);
+    }
+
+    @media (max-width: 1080px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Settings Sidebar */
+    .controls-pane {
+      background: var(--app-surface);
+      border-inline-end: 1px solid var(--app-border);
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 61px);
+    }
+
+    @media (max-width: 1080px) {
+      .controls-pane {
+        max-height: none;
+        border-inline-end: none;
+        border-bottom: 1px solid var(--app-border);
+      }
+    }
+
+    .controls-search-bar {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--app-border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--app-surface-2);
+      border: 1px solid var(--app-border);
+      color: var(--app-text);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--app-accent);
+    }
+
+    .controls-scroll {
+      overflow-y: auto;
+      padding: 10px 12px 24px;
+      flex: 1;
+    }
+
+    .controls-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .controls-scroll::-webkit-scrollbar-thumb {
+      background: #333b4d;
+      border-radius: 3px;
+    }
+
+    .group-card {
+      background: var(--app-surface-2);
+      border: 1px solid var(--app-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .group-header {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--app-text);
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 13.5px;
+      font-weight: 600;
+      text-align: start;
+    }
+
+    .group-header:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .group-header .chevron {
+      transition: transform 0.2s ease;
+      font-size: 11px;
+      color: var(--app-text-muted);
+    }
+
+    .group-card.open .group-header .chevron {
+      transform: rotate(180deg);
+    }
+
+    .group-body {
+      display: none;
+      padding: 4px 12px 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .group-card.open .group-body {
+      display: block;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 6px;
+      border-radius: var(--radius-lg);
+      transition: background 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .color-row:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .color-row.flash {
+      background: rgba(59, 130, 246, 0.22);
+      box-shadow: 0 0 0 1px var(--app-accent);
+    }
+
+    .color-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .color-label {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--app-text);
+    }
+
+    .color-key {
+      font-size: 11px;
+      font-family: var(--mono-font);
+      color: var(--app-text-muted);
+      direction: ltr;
+      text-align: start;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .color-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      direction: ltr;
+    }
+
+    .color-picker {
+      width: 32px;
+      height: 32px;
+      border: none;
+	  border-radius: var(--radius-lg);
+      background: #6c757d49;
+      cursor: pointer;
+	  
+    }
+
+    .color-picker::-webkit-color-swatch-wrapper {
+      padding: 4px;
+    }
+
+    .color-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: 4px;
+    }
+
+    .hex-input {
+      width: 82px;
+      background: #12151d;
+      border: none;
+      color: var(--app-text);
+      padding: 4px 6px;
+      border-radius: var(--radius-lg);
+      font-size: 11.5px;
+      font-family: var(--mono-font);
+      text-align: center;
+      outline: none;
+    }
+
+    .hex-input:focus {
+      border-color: var(--app-accent);
+    }
+
+    /* Right/Left Preview + Export Area */
+    .preview-pane {
+      padding: 18px 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+      max-height: calc(100vh - 61px);
+    }
+
+    @media (max-width: 1080px) {
+      .preview-pane {
+        max-height: none;
+        padding: 14px;
+      }
+    }
+
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .preview-hint {
+      font-size: 12.5px;
+      color: var(--app-text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hint-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--app-success);
+      display: inline-block;
+    }
+
+    /* VS Code Mockup Window (Always LTR) */
+    .vscode-window {
+      direction: ltr;
+      text-align: left;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #333844;
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      min-height: 530px;
+      user-select: none;
+      position: relative;
+    }
+
+    /* Highlight Effect When Hovering Setting */
+    [data-target] {
+      transition: outline 0.12s ease, filter 0.12s ease;
+    }
+
+    .target-highlight {
+      outline: 2px solid #f59e0b !important;
+      outline-offset: -2px;
+      box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.35) !important;
+      z-index: 5;
+    }
+
+    /* 1. Title Bar */
+    .vs-titlebar {
+      height: 34px;
+      background: var(--vs-title-bg);
+      color: var(--vs-title-fg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+    }
+
+    .vs-window-dots {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .vs-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .vs-dot.red { background: #ff5f56; }
+    .vs-dot.yellow { background: #ffbd2e; }
+    .vs-dot.green { background: #27c93f; }
+
+    .vs-title-search {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 3px 40px;
+      border-radius: 5px;
+      font-size: 11.5px;
+      opacity: 0.9;
+    }
+
+    .vs-title-spacer {
+      width: 48px;
+    }
+
+    /* Middle Body */
+    .vs-body {
+      display: flex;
+      flex: 1;
+      min-height: 465px;
+    }
+
+    /* 2. Activity Bar */
+    .vs-activitybar {
+      width: 48px;
+      background: var(--vs-activity-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-right: 1px solid var(--vs-sidebar-border);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .vs-activity-top, .vs-activity-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .vs-act-icon {
+      width: 100%;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      color: var(--vs-activity-inactive-fg);
+    }
+
+    .vs-act-icon.active {
+      color: var(--vs-activity-fg);
+      border-left: 2px solid var(--vs-activity-fg);
+    }
+
+    .vs-act-icon svg {
+      width: 21px;
+      height: 21px;
+      fill: currentColor;
+    }
+
+    .vs-badge {
+      position: absolute;
+      bottom: 2px;
+      right: 7px;
+      background: var(--vs-badge-bg);
+      color: var(--vs-badge-fg);
+      font-size: 9.5px;
+      font-weight: 700;
+      min-width: 15px;
+      height: 15px;
+      border-radius: 99px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+
+    /* 3. Side Bar */
+    .vs-sidebar {
+      width: 205px;
+      background: var(--vs-sidebar-bg);
+      color: var(--vs-sidebar-fg);
+      border-right: 1px solid var(--vs-sidebar-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      font-size: 12.5px;
+    }
+
+    @media (max-width: 680px) {
+      .vs-sidebar {
+        width: 145px;
+      }
+    }
+
+    .vs-sidebar-title {
+      padding: 9px 14px;
+      font-size: 11px;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+      color: var(--vs-sidebar-title-fg);
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .vs-sidebar-section-header {
+      background: var(--vs-sidebar-header-bg);
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .vs-tree {
+      padding: 4px 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vs-tree-item {
+      padding: 4px 12px 4px 20px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      cursor: pointer;
+    }
+
+    .vs-tree-item.indent {
+      padding-left: 32px;
+    }
+
+    .vs-tree-item.active {
+      background: var(--vs-list-active-bg);
+      color: var(--vs-list-active-fg);
+    }
+
+    .vs-tree-item.hovered {
+      background: var(--vs-list-hover-bg);
+    }
+
+    .file-tag {
+      font-size: 10px;
+      font-weight: 700;
+      width: 16px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* 4. Main Editor & Panel Column */
+    .vs-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Tabs */
+    .vs-tabs-bar {
+      height: 35px;
+      background: var(--vs-tabs-bg);
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--vs-tab-border);
+    }
+
+    .vs-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 13px;
+      font-size: 12.5px;
+      background: var(--vs-tab-inactive-bg);
+      color: var(--vs-tab-inactive-fg);
+      border-right: 1px solid var(--vs-tab-border);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .vs-tab.active {
+      background: var(--vs-tab-active-bg);
+      color: var(--vs-tab-active-fg);
+      border-top: 2px solid var(--vs-tab-active-border);
+    }
+
+    /* Editor */
+    .vs-editor {
+      flex: 1;
+      background: var(--vs-editor-bg);
+      color: var(--vs-editor-fg);
+      font-family: var(--mono-font);
+      font-size: 12.5px;
+      line-height: 1.65;
+      padding: 10px 0;
+      overflow-x: auto;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      padding: 0 14px 0 0;
+      white-space: pre;
+    }
+
+    .code-line.active-line {
+      background: var(--vs-line-highlight);
+    }
+
+    .line-num {
+      width: 44px;
+      text-align: right;
+      padding-right: 16px;
+      color: var(--vs-linenum-fg);
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+
+    .code-line.active-line .line-num {
+      color: var(--vs-linenum-active-fg);
+    }
+
+    .tok-comment { color: var(--vs-tok-comment); font-style: italic; }
+    .tok-keyword { color: var(--vs-tok-keyword); }
+    .tok-string { color: var(--vs-tok-string); }
+    .tok-function { color: var(--vs-tok-function); }
+    .tok-type { color: var(--vs-tok-type); }
+    .tok-variable { color: var(--vs-tok-variable); }
+    .tok-number { color: var(--vs-tok-number); }
+
+    .code-selection {
+      background: var(--vs-selection-bg);
+      border-radius: 2px;
+      padding: 1px 0;
+    }
+
+    .vs-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 15px;
+      background: var(--vs-cursor-fg);
+      vertical-align: middle;
+      margin-left: 1px;
+      animation: blink 1.1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    /* 5. Bottom Terminal / Panel */
+    .vs-panel {
+      height: 138px;
+      background: var(--vs-panel-bg);
+      border-top: 1px solid var(--vs-panel-border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vs-panel-tabs {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 6px 14px 0;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--vs-tab-inactive-fg);
+    }
+
+    .vs-panel-tab {
+      padding-bottom: 6px;
+      cursor: pointer;
+    }
+
+    .vs-panel-tab.active {
+      color: var(--vs-panel-title-fg);
+      border-bottom: 1.5px solid var(--vs-panel-title-border);
+    }
+
+    .vs-terminal {
+      flex: 1;
+      background: var(--vs-term-bg);
+      color: var(--vs-term-fg);
+      font-family: var(--mono-font);
+      font-size: 12px;
+      line-height: 1.55;
+      padding: 8px 14px;
+      overflow-y: auto;
+      cursor: pointer;
+    }
+
+    /* 6. Status Bar */
+    .vs-statusbar {
+      height: 24px;
+      background: var(--vs-status-bg);
+      color: var(--vs-status-fg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+    }
+
+    .vs-status-left, .vs-status-right {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    .vs-status-remote {
+      background: var(--vs-status-remote-bg);
+      color: var(--vs-status-remote-fg);
+      height: 100%;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .vs-status-item {
+      padding: 0 9px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* JSON Export Section */
+    .export-card {
+      background: var(--app-surface);
+      border: 1px solid var(--app-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .export-header {
+      padding: 12px 16px;
+      background: var(--app-surface-2);
+      border-bottom: 1px solid var(--app-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .export-title-wrap h2 {
+      font-size: 14.5px;
+      font-weight: 700;
+    }
+
+    .export-title-wrap p {
+      font-size: 12px;
+      color: var(--app-text-muted);
+      margin-top: 2px;
+    }
+
+    .export-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      color: var(--app-text-muted);
+      cursor: pointer;
+    }
+
+    .json-pre {
+      direction: ltr;
+      text-align: left;
+      font-family: var(--mono-font);
+      font-size: 12px;
+      line-height: 1.55;
+      color: #d1d9e6;
+      background: #0d1017;
+      padding: 14px 16px;
+      max-height: 270px;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    .how-to-box {
+      padding: 10px 16px;
+      background: rgba(59, 130, 246, 0.08);
+      border-top: 1px solid var(--app-border);
+      font-size: 12px;
+      color: var(--app-text-muted);
+      line-height: 1.7;
+    }
+
+    .how-to-box code {
+      background: rgba(255, 255, 255, 0.09);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: var(--mono-font);
+      color: var(--app-text);
+      direction: ltr;
+      display: inline-block;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--app-success);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">{ }</div>
+      <div class="brand-text">
+        <h1 data-i18n="appTitle">ویرایشگر زنده قالب رنگ VS Code</h1>
+        <p data-i18n="appSubtitle">تغییر رنگ بخش‌های مختلف و کپی مستقیم تنظیمات در settings.json</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <select id="presetSelect" class="preset-select" aria-label="Theme Presets">
+        <option value="darkPlus" data-i18n="presetDarkPlus">قالب آماده: Dark+ (پیش‌فرض تیره)</option>
+        <option value="tokyoNight" data-i18n="presetTokyo">قالب آماده: Tokyo Night</option>
+        <option value="dracula" data-i18n="presetDracula">قالب آماده: Dracula</option>
+        <option value="monokai" data-i18n="presetMonokai">قالب آماده: Monokai</option>
+        <option value="lightPlus" data-i18n="presetLightPlus">قالب آماده: Light+ (روشن)</option>
+      </select>
+
+      <button id="resetBtn" class="btn" type="button" data-i18n="resetBtn">بازنشانی</button>
+      <button id="langBtn" class="btn" type="button">English</button>
+      <button id="topCopyBtn" class="btn btn-primary" type="button" data-i18n="copyTopBtn">کپی تنظیمات JSON</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Settings Panel -->
+    <aside class="controls-pane">
+      <div class="controls-search-bar">
+        <input id="searchInput" class="search-input" type="text" placeholder="جستجوی بخش یا کلید رنگ (مثلاً: sidebar, editor, string)..." />
+      </div>
+      <div id="controlsContainer" class="controls-scroll"></div>
+    </aside>
+
+    <!-- Live Preview & JSON Export -->
+    <section class="preview-pane">
+      <div class="preview-toolbar">
+        <div class="preview-hint">
+          <span class="hint-dot"></span>
+          <span data-i18n="previewHint">پیش‌نمایش زنده: با نگه داشتن موس روی هر تنظیم، بخش مربوطه روشن می‌شود و با کلیک روی هر قسمت از VS Code به تنظیم آن هدایت می‌شوید.</span>
+        </div>
+      </div>
+
+      <!-- Realistic VS Code Mockup -->
+      <div class="vscode-window" id="vscodeWindow">
+        <!-- Title Bar -->
+        <div class="vs-titlebar" data-target="titleBar" data-focus-key="titleBar.activeBackground">
+          <div class="vs-window-dots">
+            <span class="vs-dot red"></span>
+            <span class="vs-dot yellow"></span>
+            <span class="vs-dot green"></span>
+          </div>
+          <div class="vs-title-search">App.tsx — my-vscode-project</div>
+          <div class="vs-title-spacer"></div>
+        </div>
+
+        <div class="vs-body">
+          <!-- Activity Bar -->
+          <div class="vs-activitybar" data-target="activityBar" data-focus-key="activityBar.background">
+            <div class="vs-activity-top">
+              <div class="vs-act-icon active" title="Explorer">
+                <svg viewBox="0 0 24 24"><path d="M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zm-3 20.38h-12v-15H7v9.07L8.5 18h6v4.5zm6-6h-12v-15H16V6h4.5v10.5z"/></svg>
+              </div>
+              <div class="vs-act-icon" title="Search">
+                <svg viewBox="0 0 24 24"><path d="M15.25 0a8.25 8.25 0 0 0-6.18 13.72L1 21.8 2.2 23l8.08-8.07A8.25 8.25 0 1 0 15.25 0zm0 14.5a6.25 6.25 0 1 1 0-12.5 6.25 6.25 0 0 1 0 12.5z"/></svg>
+              </div>
+              <div class="vs-act-icon" title="Source Control" data-target="badge" data-focus-key="activityBarBadge.background">
+                <svg viewBox="0 0 24 24"><path d="M21 15.17a3 3 0 0 0-2-2.82V8.83a3 3 0 0 0 1-5.83 3 3 0 0 0-3 3c0 1.28.81 2.37 1.95 2.79v3.56a3 3 0 0 0-1.95 2.82c0 1.3.84 2.41 2 2.82v.01a3 3 0 0 0 2-2.83zM7 6a3 3 0 1 0-4 2.83v6.34a3 3 0 1 0 2 0V8.83A3 3 0 0 0 7 6z"/></svg>
+                <span class="vs-badge" data-target="badge" data-focus-key="activityBarBadge.background">3</span>
+              </div>
+              <div class="vs-act-icon" title="Extensions">
+                <svg viewBox="0 0 24 24"><path d="M13.5 1.5v5.25h5.25V1.5H13.5zm3.75 3.75H15V3h2.25v2.25zM3 6.75v12.75h12.75V6.75H3zm11.25 11.25H4.5V8.25h9.75V18z"/></svg>
+              </div>
+            </div>
+            <div class="vs-activity-bottom">
+              <div class="vs-act-icon" title="Settings">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.1 7.1 0 0 0-1.62-.94l-.36-2.54a.49.49 0 0 0-.49-.42h-3.84a.49.49 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.83 14.52a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.61.22l2.39-.96c.5.4 1.04.71 1.62.94l.36 2.54c.05.24.25.42.49.42h3.84c.24 0 .44-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.62-.94l2.39.96c.22.09.48 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side Bar -->
+          <div class="vs-sidebar" data-target="sideBar" data-focus-key="sideBar.background">
+            <div class="vs-sidebar-title" data-target="sideBarTitle" data-focus-key="sideBarTitle.foreground">Explorer</div>
+            <div class="vs-sidebar-section-header" data-target="sideBarHeader" data-focus-key="sideBarSectionHeader.background">
+              <span>▾</span>
+              <span>MY-VSCODE-PROJECT</span>
+            </div>
+            <div class="vs-tree">
+              <div class="vs-tree-item"><span>▾</span><span>📁 src</span></div>
+              <div class="vs-tree-item indent active" data-target="listActive" data-focus-key="list.activeSelectionBackground">
+                <span class="file-tag" style="color:#61dafb">TSX</span><span>App.tsx</span>
+              </div>
+              <div class="vs-tree-item indent hovered" data-target="listHover" data-focus-key="list.hoverBackground">
+                <span class="file-tag" style="color:#42a5f5">CSS</span><span>styles.css</span>
+              </div>
+              <div class="vs-tree-item indent">
+                <span class="file-tag" style="color:#3178c6">TS</span><span>theme.ts</span>
+              </div>
+              <div class="vs-tree-item">
+                <span class="file-tag" style="color:#fbc02d">{ }</span><span>settings.json</span>
+              </div>
+              <div class="vs-tree-item">
+                <span class="file-tag" style="color:#8bc34a">MD</span><span>README.md</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Editor & Terminal -->
+          <div class="vs-main">
+            <!-- Tabs -->
+            <div class="vs-tabs-bar" data-target="tabsBar" data-focus-key="editorGroupHeader.tabsBackground">
+              <div class="vs-tab active" data-target="tabActive" data-focus-key="tab.activeBackground">
+                <span style="color:#61dafb;font-weight:700;font-size:11px">TSX</span>
+                <span>App.tsx</span>
+                <span style="opacity:0.6;font-size:11px">×</span>
+              </div>
+              <div class="vs-tab" data-target="tabInactive" data-focus-key="tab.inactiveBackground">
+                <span style="color:#42a5f5;font-weight:700;font-size:11px">CSS</span>
+                <span>styles.css</span>
+              </div>
+              <div class="vs-tab" data-target="tabInactive" data-focus-key="tab.inactiveBackground">
+                <span style="color:#fbc02d;font-weight:700;font-size:11px">{ }</span>
+                <span>settings.json</span>
+              </div>
+            </div>
+
+            <!-- Code Editor -->
+            <div class="vs-editor" data-target="editor" data-focus-key="editor.background">
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">1</span>
+                <span class="tok-comment" data-target="tokComment" data-focus-key="comments">// Custom VS Code Theme Live Preview</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">2</span>
+                <span><span class="tok-keyword" data-target="tokKeyword" data-focus-key="keywords">interface</span> <span class="tok-type" data-target="tokType" data-focus-key="types">ThemeConfig</span> {</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">3</span>
+                <span>  <span class="tok-variable" data-target="tokVariable" data-focus-key="variables">name</span>: <span class="tok-type" data-target="tokType" data-focus-key="types">string</span>;</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">4</span>
+                <span>  <span class="tok-variable" data-target="tokVariable" data-focus-key="variables">opacity</span>: <span class="tok-type" data-target="tokType" data-focus-key="types">number</span>;</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">5</span>
+                <span>}</span>
+              </div>
+              <div class="code-line active-line" data-target="lineHighlight" data-focus-key="editor.lineHighlightBackground">
+                <span class="line-num" data-target="lineNumActive" data-focus-key="editorLineNumber.activeForeground">6</span>
+                <span><span class="tok-keyword" data-target="tokKeyword" data-focus-key="keywords">export function</span> <span class="tok-function" data-target="tokFunction" data-focus-key="functions">applyTheme</span>(<span class="tok-variable" data-target="tokVariable" data-focus-key="variables">cfg</span>: <span class="tok-type" data-target="tokType" data-focus-key="types">ThemeConfig</span>) {<span class="vs-cursor" data-target="cursor" data-focus-key="editorCursor.foreground"></span></span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">7</span>
+                <span>  <span class="tok-keyword" data-target="tokKeyword" data-focus-key="keywords">const</span> <span class="tok-variable" data-target="tokVariable" data-focus-key="variables">greeting</span> = <span class="code-selection" data-target="selection" data-focus-key="editor.selectionBackground"><span class="tok-string" data-target="tokString" data-focus-key="strings">"Hello VS Code!"</span></span>;</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">8</span>
+                <span>  <span class="tok-keyword" data-target="tokKeyword" data-focus-key="keywords">const</span> <span class="tok-variable" data-target="tokVariable" data-focus-key="variables">scale</span> = <span class="tok-number" data-target="tokNumber" data-focus-key="numbers">1.25</span>;</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">9</span>
+                <span>  <span class="tok-keyword" data-target="tokKeyword" data-focus-key="keywords">return</span> <span class="tok-function" data-target="tokFunction" data-focus-key="functions">console.log</span>(<span class="tok-variable" data-target="tokVariable" data-focus-key="variables">greeting</span>, <span class="tok-variable" data-target="tokVariable" data-focus-key="variables">cfg</span>.<span class="tok-variable" data-target="tokVariable" data-focus-key="variables">name</span>, <span class="tok-variable" data-target="tokVariable" data-focus-key="variables">scale</span>);</span>
+              </div>
+              <div class="code-line">
+                <span class="line-num" data-target="lineNum" data-focus-key="editorLineNumber.foreground">10</span>
+                <span>}</span>
+              </div>
+            </div>
+
+            <!-- Panel & Terminal -->
+            <div class="vs-panel" data-target="panel" data-focus-key="panel.background">
+              <div class="vs-panel-tabs">
+                <div class="vs-panel-tab">Problems</div>
+                <div class="vs-panel-tab">Output</div>
+                <div class="vs-panel-tab active" data-target="panelTitle" data-focus-key="panelTitle.activeForeground">Terminal</div>
+              </div>
+              <div class="vs-terminal" data-target="terminal" data-focus-key="terminal.background">
+                <div>~/my-vscode-project $ npm run dev</div>
+                <div style="opacity:0.8">  VITE v5.4.0  ready in 210 ms</div>
+                <div style="opacity:0.8">  ➜  Local:   http://localhost:5173/</div>
+                <div>~/my-vscode-project $ _</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="vs-statusbar" data-target="statusBar" data-focus-key="statusBar.background">
+          <div class="vs-status-left">
+            <div class="vs-status-remote" data-target="statusRemote" data-focus-key="statusBarItem.remoteBackground">WSL: Ubuntu</div>
+            <div class="vs-status-item">⎇ main*</div>
+            <div class="vs-status-item">⊗ 0  ⚠ 0</div>
+          </div>
+          <div class="vs-status-right">
+            <div class="vs-status-item">Ln 6, Col 42</div>
+            <div class="vs-status-item">UTF-8</div>
+            <div class="vs-status-item">TypeScript React</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export JSON Section -->
+      <div class="export-card">
+        <div class="export-header">
+          <div class="export-title-wrap">
+            <h2 data-i18n="exportTitle">خروجی دقیق تنظیمات (settings.json)</h2>
+            <p data-i18n="exportDesc">پس از رضایت از رنگ‌بندی، این کد را کپی کرده و در فایل تنظیمات VS Code خود قرار دهید.</p>
+          </div>
+          <div class="export-controls">
+            <label class="checkbox-wrap">
+              <input type="checkbox" id="innerOnlyCheckbox" />
+              <span data-i18n="innerOnlyLabel">بدون آکولاد بیرونی (برای چسباندن در فایل دارای تنظیمات قبلی)</span>
+            </label>
+            <button id="copyJsonBtn" class="btn btn-primary" type="button" data-i18n="copyBtn">کپی در کلیپ‌بورد</button>
+          </div>
+        </div>
+        <pre id="jsonOutput" class="json-pre"></pre>
+        <div class="how-to-box" data-i18n="howToGuide">
+          <strong>راهنمای اعمال در VS Code:</strong> کلیدهای <code>Ctrl + Shift + P</code> (یا در مک <code>Cmd + Shift + P</code>) را بزنید، عبارت <code>Preferences: Open User Settings (JSON)</code> را جستجو و انتخاب کنید، سپس کد بالا را در آن فایل جایگذاری (Paste) و ذخیره کنید.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Presets matching authentic VS Code keys
+    const PRESETS = {
+      darkPlus: {
+        workbench: {
+          "titleBar.activeBackground": "#181818",
+          "titleBar.activeForeground": "#cccccc",
+          "activityBar.background": "#181818",
+          "activityBar.foreground": "#ffffff",
+          "activityBar.inactiveForeground": "#858585",
+          "activityBarBadge.background": "#0078d4",
+          "activityBarBadge.foreground": "#ffffff",
+          "sideBar.background": "#181818",
+          "sideBar.foreground": "#cccccc",
+          "sideBarTitle.foreground": "#bbbbbb",
+          "sideBarSectionHeader.background": "#222222",
+          "sideBar.border": "#2b2b2b",
+          "list.activeSelectionBackground": "#04395e",
+          "list.activeSelectionForeground": "#ffffff",
+          "list.hoverBackground": "#2a2d2e",
+          "editorGroupHeader.tabsBackground": "#181818",
+          "tab.activeBackground": "#1f1f1f",
+          "tab.activeForeground": "#ffffff",
+          "tab.activeBorderTop": "#0078d4",
+          "tab.inactiveBackground": "#181818",
+          "tab.inactiveForeground": "#9d9d9d",
+          "tab.border": "#2b2b2b",
+          "editor.background": "#1f1f1f",
+          "editor.foreground": "#cccccc",
+          "editorLineNumber.foreground": "#6e7681",
+          "editorLineNumber.activeForeground": "#cccccc",
+          "editor.lineHighlightBackground": "#2a2d2e80",
+          "editor.selectionBackground": "#264f78aa",
+          "editorCursor.foreground": "#aeafad",
+          "panel.background": "#181818",
+          "panel.border": "#2b2b2b",
+          "panelTitle.activeForeground": "#e7e7e7",
+          "panelTitle.activeBorder": "#0078d4",
+          "terminal.background": "#181818",
+          "terminal.foreground": "#cccccc",
+          "statusBar.background": "#181818",
+          "statusBar.foreground": "#cccccc",
+          "statusBarItem.remoteBackground": "#0078d4",
+          "statusBarItem.remoteForeground": "#ffffff"
+        },
+        tokens: {
+          "comments": "#6a9955",
+          "keywords": "#569cd6",
+          "strings": "#ce9178",
+          "functions": "#dcdcaa",
+          "types": "#4ec9b0",
+          "variables": "#9cdcfe",
+          "numbers": "#b5cea8"
+        }
+      },
+      tokyoNight: {
+        workbench: {
+          "titleBar.activeBackground": "#16161e",
+          "titleBar.activeForeground": "#a9b1d6",
+          "activityBar.background": "#16161e",
+          "activityBar.foreground": "#7aa2f7",
+          "activityBar.inactiveForeground": "#565f89",
+          "activityBarBadge.background": "#7aa2f7",
+          "activityBarBadge.foreground": "#16161e",
+          "sideBar.background": "#16161e",
+          "sideBar.foreground": "#a9b1d6",
+          "sideBarTitle.foreground": "#7aa2f7",
+          "sideBarSectionHeader.background": "#1f2335",
+          "sideBar.border": "#101014",
+          "list.activeSelectionBackground": "#283457",
+          "list.activeSelectionForeground": "#ffffff",
+          "list.hoverBackground": "#1f2335",
+          "editorGroupHeader.tabsBackground": "#16161e",
+          "tab.activeBackground": "#1a1b26",
+          "tab.activeForeground": "#c0caf5",
+          "tab.activeBorderTop": "#7aa2f7",
+          "tab.inactiveBackground": "#16161e",
+          "tab.inactiveForeground": "#565f89",
+          "tab.border": "#101014",
+          "editor.background": "#1a1b26",
+          "editor.foreground": "#a9b1d6",
+          "editorLineNumber.foreground": "#3b4261",
+          "editorLineNumber.activeForeground": "#7aa2f7",
+          "editor.lineHighlightBackground": "#292e4290",
+          "editor.selectionBackground": "#33467cbb",
+          "editorCursor.foreground": "#c0caf5",
+          "panel.background": "#16161e",
+          "panel.border": "#101014",
+          "panelTitle.activeForeground": "#c0caf5",
+          "panelTitle.activeBorder": "#7aa2f7",
+          "terminal.background": "#16161e",
+          "terminal.foreground": "#a9b1d6",
+          "statusBar.background": "#16161e",
+          "statusBar.foreground": "#787c99",
+          "statusBarItem.remoteBackground": "#7aa2f7",
+          "statusBarItem.remoteForeground": "#16161e"
+        },
+        tokens: {
+          "comments": "#565f89",
+          "keywords": "#bb9af7",
+          "strings": "#9ece6a",
+          "functions": "#7aa2f7",
+          "types": "#2ac3de",
+          "variables": "#c0caf5",
+          "numbers": "#ff9e64"
+        }
+      },
+      dracula: {
+        workbench: {
+          "titleBar.activeBackground": "#21222c",
+          "titleBar.activeForeground": "#f8f8f2",
+          "activityBar.background": "#343746",
+          "activityBar.foreground": "#f8f8f2",
+          "activityBar.inactiveForeground": "#6272a4",
+          "activityBarBadge.background": "#ff79c6",
+          "activityBarBadge.foreground": "#282a36",
+          "sideBar.background": "#21222c",
+          "sideBar.foreground": "#f8f8f2",
+          "sideBarTitle.foreground": "#bd93f9",
+          "sideBarSectionHeader.background": "#282a36",
+          "sideBar.border": "#191a21",
+          "list.activeSelectionBackground": "#44475a",
+          "list.activeSelectionForeground": "#ffffff",
+          "list.hoverBackground": "#343746",
+          "editorGroupHeader.tabsBackground": "#191a21",
+          "tab.activeBackground": "#282a36",
+          "tab.activeForeground": "#f8f8f2",
+          "tab.activeBorderTop": "#ff79c6",
+          "tab.inactiveBackground": "#21222c",
+          "tab.inactiveForeground": "#6272a4",
+          "tab.border": "#191a21",
+          "editor.background": "#282a36",
+          "editor.foreground": "#f8f8f2",
+          "editorLineNumber.foreground": "#6272a4",
+          "editorLineNumber.activeForeground": "#f8f8f2",
+          "editor.lineHighlightBackground": "#44475a75",
+          "editor.selectionBackground": "#44475acc",
+          "editorCursor.foreground": "#f8f8f2",
+          "panel.background": "#282a36",
+          "panel.border": "#bd93f9",
+          "panelTitle.activeForeground": "#f8f8f2",
+          "panelTitle.activeBorder": "#ff79c6",
+          "terminal.background": "#282a36",
+          "terminal.foreground": "#f8f8f2",
+          "statusBar.background": "#191a21",
+          "statusBar.foreground": "#f8f8f2",
+          "statusBarItem.remoteBackground": "#bd93f9",
+          "statusBarItem.remoteForeground": "#282a36"
+        },
+        tokens: {
+          "comments": "#6272a4",
+          "keywords": "#ff79c6",
+          "strings": "#f1fa8c",
+          "functions": "#50fa7b",
+          "types": "#8be9fd",
+          "variables": "#f8f8f2",
+          "numbers": "#bd93f9"
+        }
+      },
+      monokai: {
+        workbench: {
+          "titleBar.activeBackground": "#1e1f1c",
+          "titleBar.activeForeground": "#f8f8f2",
+          "activityBar.background": "#272822",
+          "activityBar.foreground": "#f8f8f2",
+          "activityBar.inactiveForeground": "#75715e",
+          "activityBarBadge.background": "#a6e22e",
+          "activityBarBadge.foreground": "#272822",
+          "sideBar.background": "#1e1f1c",
+          "sideBar.foreground": "#ccccc7",
+          "sideBarTitle.foreground": "#f8f8f2",
+          "sideBarSectionHeader.background": "#272822",
+          "sideBar.border": "#161714",
+          "list.activeSelectionBackground": "#49483e",
+          "list.activeSelectionForeground": "#ffffff",
+          "list.hoverBackground": "#3e3d32",
+          "editorGroupHeader.tabsBackground": "#1e1f1c",
+          "tab.activeBackground": "#272822",
+          "tab.activeForeground": "#ffffff",
+          "tab.activeBorderTop": "#a6e22e",
+          "tab.inactiveBackground": "#34352f",
+          "tab.inactiveForeground": "#a6a69e",
+          "tab.border": "#1e1f1c",
+          "editor.background": "#272822",
+          "editor.foreground": "#f8f8f2",
+          "editorLineNumber.foreground": "#90908a",
+          "editorLineNumber.activeForeground": "#f8f8f2",
+          "editor.lineHighlightBackground": "#3e3d3288",
+          "editor.selectionBackground": "#49483ecc",
+          "editorCursor.foreground": "#f8f8f0",
+          "panel.background": "#1e1f1c",
+          "panel.border": "#414339",
+          "panelTitle.activeForeground": "#f8f8f2",
+          "panelTitle.activeBorder": "#f92672",
+          "terminal.background": "#272822",
+          "terminal.foreground": "#f8f8f2",
+          "statusBar.background": "#414339",
+          "statusBar.foreground": "#f8f8f2",
+          "statusBarItem.remoteBackground": "#f92672",
+          "statusBarItem.remoteForeground": "#ffffff"
+        },
+        tokens: {
+          "comments": "#88846f",
+          "keywords": "#f92672",
+          "strings": "#e6db74",
+          "functions": "#a6e22e",
+          "types": "#66d9ef",
+          "variables": "#f8f8f2",
+          "numbers": "#ae81ff"
+        }
+      },
+      lightPlus: {
+        workbench: {
+          "titleBar.activeBackground": "#dddddd",
+          "titleBar.activeForeground": "#333333",
+          "activityBar.background": "#2c2c2c",
+          "activityBar.foreground": "#ffffff",
+          "activityBar.inactiveForeground": "#999999",
+          "activityBarBadge.background": "#007acc",
+          "activityBarBadge.foreground": "#ffffff",
+          "sideBar.background": "#f3f3f3",
+          "sideBar.foreground": "#333333",
+          "sideBarTitle.foreground": "#6f6f6f",
+          "sideBarSectionHeader.background": "#e8e8e8",
+          "sideBar.border": "#e0e0e0",
+          "list.activeSelectionBackground": "#0060c0",
+          "list.activeSelectionForeground": "#ffffff",
+          "list.hoverBackground": "#e8e8e8",
+          "editorGroupHeader.tabsBackground": "#f3f3f3",
+          "tab.activeBackground": "#ffffff",
+          "tab.activeForeground": "#333333",
+          "tab.activeBorderTop": "#007acc",
+          "tab.inactiveBackground": "#ececec",
+          "tab.inactiveForeground": "#6f6f6f",
+          "tab.border": "#e5e5e5",
+          "editor.background": "#ffffff",
+          "editor.foreground": "#000000",
+          "editorLineNumber.foreground": "#237893",
+          "editorLineNumber.activeForeground": "#0b216f",
+          "editor.lineHighlightBackground": "#f0f0f0",
+          "editor.selectionBackground": "#add6ff",
+          "editorCursor.foreground": "#000000",
+          "panel.background": "#ffffff",
+          "panel.border": "#e0e0e0",
+          "panelTitle.activeForeground": "#424242",
+          "panelTitle.activeBorder": "#007acc",
+          "terminal.background": "#ffffff",
+          "terminal.foreground": "#333333",
+          "statusBar.background": "#007acc",
+          "statusBar.foreground": "#ffffff",
+          "statusBarItem.remoteBackground": "#16825d",
+          "statusBarItem.remoteForeground": "#ffffff"
+        },
+        tokens: {
+          "comments": "#008000",
+          "keywords": "#0000ff",
+          "strings": "#a31515",
+          "functions": "#795e26",
+          "types": "#267f99",
+          "variables": "#001080",
+          "numbers": "#098658"
+        }
+      }
+    };
+
+    // Mapping of UI Controls -> CSS Variables + Preview Targets
+    const SCHEMA = [
+      {
+        id: "editor",
+        titleFa: "ویرایشگر کد (Editor)",
+        titleEn: "Code Editor",
+        open: true,
+        items: [
+          { section: "workbench", key: "editor.background", css: "--vs-editor-bg", target: "editor", labelFa: "پس‌زمینه ویرایشگر", labelEn: "Editor Background" },
+          { section: "workbench", key: "editor.foreground", css: "--vs-editor-fg", target: "editor", labelFa: "متن پیش‌فرض کد", labelEn: "Editor Foreground" },
+          { section: "workbench", key: "editorLineNumber.foreground", css: "--vs-linenum-fg", target: "lineNum", labelFa: "شماره خطوط", labelEn: "Line Numbers" },
+          { section: "workbench", key: "editorLineNumber.activeForeground", css: "--vs-linenum-active-fg", target: "lineNumActive", labelFa: "شماره خط فعال", labelEn: "Active Line Number" },
+          { section: "workbench", key: "editor.lineHighlightBackground", css: "--vs-line-highlight", target: "lineHighlight", labelFa: "هایلایت خط جاری", labelEn: "Line Highlight" },
+          { section: "workbench", key: "editor.selectionBackground", css: "--vs-selection-bg", target: "selection", labelFa: "پس‌زمینه انتخاب متن", labelEn: "Selection Background" },
+          { section: "workbench", key: "editorCursor.foreground", css: "--vs-cursor-fg", target: "cursor", labelFa: "رنگ مکان‌نما (Cursor)", labelEn: "Cursor Color" }
+        ]
+      },
+      {
+        id: "tokens",
+        titleFa: "رنگ‌بندی ساختار کد (Syntax)",
+        titleEn: "Syntax Highlighting",
+        open: true,
+        items: [
+          { section: "tokens", key: "comments", css: "--vs-tok-comment", target: "tokComment", labelFa: "توضیحات (Comments)", labelEn: "Comments" },
+          { section: "tokens", key: "keywords", css: "--vs-tok-keyword", target: "tokKeyword", labelFa: "کلمات کلیدی (Keywords)", labelEn: "Keywords" },
+          { section: "tokens", key: "strings", css: "--vs-tok-string", target: "tokString", labelFa: "رشته‌های متنی (Strings)", labelEn: "Strings" },
+          { section: "tokens", key: "functions", css: "--vs-tok-function", target: "tokFunction", labelFa: "توابع (Functions)", labelEn: "Functions" },
+          { section: "tokens", key: "types", css: "--vs-tok-type", target: "tokType", labelFa: "نوع داده‌ها (Types)", labelEn: "Types & Classes" },
+          { section: "tokens", key: "variables", css: "--vs-tok-variable", target: "tokVariable", labelFa: "متغیرها (Variables)", labelEn: "Variables" },
+          { section: "tokens", key: "numbers", css: "--vs-tok-number", target: "tokNumber", labelFa: "اعداد (Numbers)", labelEn: "Numbers" }
+        ]
+      },
+      {
+        id: "sideBar",
+        titleFa: "سایدبار و لیست فایل‌ها (Side Bar)",
+        titleEn: "Side Bar & Explorer",
+        open: false,
+        items: [
+          { section: "workbench", key: "sideBar.background", css: "--vs-sidebar-bg", target: "sideBar", labelFa: "پس‌زمینه سایدبار", labelEn: "Side Bar Background" },
+          { section: "workbench", key: "sideBar.foreground", css: "--vs-sidebar-fg", target: "sideBar", labelFa: "رنگ متن فایل‌ها", labelEn: "Side Bar Foreground" },
+          { section: "workbench", key: "sideBarTitle.foreground", css: "--vs-sidebar-title-fg", target: "sideBarTitle", labelFa: "عنوان بالای سایدبار", labelEn: "Side Bar Title" },
+          { section: "workbench", key: "sideBarSectionHeader.background", css: "--vs-sidebar-header-bg", target: "sideBarHeader", labelFa: "هدر بخش پروژه", labelEn: "Section Header Background" },
+          { section: "workbench", key: "sideBar.border", css: "--vs-sidebar-border", target: "sideBar", labelFa: "خط حاشیه سایدبار", labelEn: "Side Bar Border" },
+          { section: "workbench", key: "list.activeSelectionBackground", css: "--vs-list-active-bg", target: "listActive", labelFa: "پس‌زمینه فایل انتخاب‌شده", labelEn: "Active File Background" },
+          { section: "workbench", key: "list.activeSelectionForeground", css: "--vs-list-active-fg", target: "listActive", labelFa: "متن فایل انتخاب‌شده", labelEn: "Active File Text" },
+          { section: "workbench", key: "list.hoverBackground", css: "--vs-list-hover-bg", target: "listHover", labelFa: "رنگ هاور روی فایل", labelEn: "List Hover Background" }
+        ]
+      },
+      {
+        id: "tabs",
+        titleFa: "تب‌های فایل‌ها (Tabs)",
+        titleEn: "Editor Tabs",
+        open: false,
+        items: [
+          { section: "workbench", key: "editorGroupHeader.tabsBackground", css: "--vs-tabs-bg", target: "tabsBar", labelFa: "پس‌زمینه نوار تب‌ها", labelEn: "Tabs Bar Background" },
+          { section: "workbench", key: "tab.activeBackground", css: "--vs-tab-active-bg", target: "tabActive", labelFa: "پس‌زمینه تب فعال", labelEn: "Active Tab Background" },
+          { section: "workbench", key: "tab.activeForeground", css: "--vs-tab-active-fg", target: "tabActive", labelFa: "متن تب فعال", labelEn: "Active Tab Foreground" },
+          { section: "workbench", key: "tab.activeBorderTop", css: "--vs-tab-active-border", target: "tabActive", labelFa: "خط بالای تب فعال", labelEn: "Active Tab Top Border" },
+          { section: "workbench", key: "tab.inactiveBackground", css: "--vs-tab-inactive-bg", target: "tabInactive", labelFa: "پس‌زمینه تب غیرفعال", labelEn: "Inactive Tab Background" },
+          { section: "workbench", key: "tab.inactiveForeground", css: "--vs-tab-inactive-fg", target: "tabInactive", labelFa: "متن تب غیرفعال", labelEn: "Inactive Tab Foreground" },
+          { section: "workbench", key: "tab.border", css: "--vs-tab-border", target: "tabsBar", labelFa: "جداکننده تب‌ها", labelEn: "Tab Border" }
+        ]
+      },
+      {
+        id: "activityBar",
+        titleFa: "نوار ابزار کناری (Activity Bar)",
+        titleEn: "Activity Bar",
+        open: false,
+        items: [
+          { section: "workbench", key: "activityBar.background", css: "--vs-activity-bg", target: "activityBar", labelFa: "پس‌زمینه نوار ابزار", labelEn: "Activity Bar Background" },
+          { section: "workbench", key: "activityBar.foreground", css: "--vs-activity-fg", target: "activityBar", labelFa: "آیکون فعال", labelEn: "Active Icon Color" },
+          { section: "workbench", key: "activityBar.inactiveForeground", css: "--vs-activity-inactive-fg", target: "activityBar", labelFa: "آیکون‌های غیرفعال", labelEn: "Inactive Icon Color" },
+          { section: "workbench", key: "activityBarBadge.background", css: "--vs-badge-bg", target: "badge", labelFa: "پس‌زمینه نشان اعلان", labelEn: "Badge Background" },
+          { section: "workbench", key: "activityBarBadge.foreground", css: "--vs-badge-fg", target: "badge", labelFa: "متن نشان اعلان", labelEn: "Badge Foreground" }
+        ]
+      },
+      {
+        id: "titleBar",
+        titleFa: "نوار عنوان بالا (Title Bar)",
+        titleEn: "Title Bar",
+        open: false,
+        items: [
+          { section: "workbench", key: "titleBar.activeBackground", css: "--vs-title-bg", target: "titleBar", labelFa: "پس‌زمینه نوار بالا", labelEn: "Title Bar Background" },
+          { section: "workbench", key: "titleBar.activeForeground", css: "--vs-title-fg", target: "titleBar", labelFa: "متن نوار بالا", labelEn: "Title Bar Foreground" }
+        ]
+      },
+      {
+        id: "panel",
+        titleFa: "پنل پایین و ترمینال (Panel & Terminal)",
+        titleEn: "Panel & Terminal",
+        open: false,
+        items: [
+          { section: "workbench", key: "panel.background", css: "--vs-panel-bg", target: "panel", labelFa: "پس‌زمینه پنل پایین", labelEn: "Panel Background" },
+          { section: "workbench", key: "panel.border", css: "--vs-panel-border", target: "panel", labelFa: "خط بالای پنل", labelEn: "Panel Border" },
+          { section: "workbench", key: "panelTitle.activeForeground", css: "--vs-panel-title-fg", target: "panelTitle", labelFa: "عنوان تب فعال پنل", labelEn: "Active Panel Title" },
+          { section: "workbench", key: "panelTitle.activeBorder", css: "--vs-panel-title-border", target: "panelTitle", labelFa: "خط زیر تب فعال پنل", labelEn: "Panel Active Border" },
+          { section: "workbench", key: "terminal.background", css: "--vs-term-bg", target: "terminal", labelFa: "پس‌زمینه ترمینال", labelEn: "Terminal Background" },
+          { section: "workbench", key: "terminal.foreground", css: "--vs-term-fg", target: "terminal", labelFa: "متن ترمینال", labelEn: "Terminal Foreground" }
+        ]
+      },
+      {
+        id: "statusBar",
+        titleFa: "نوار وضعیت پایین (Status Bar)",
+        titleEn: "Status Bar",
+        open: false,
+        items: [
+          { section: "workbench", key: "statusBar.background", css: "--vs-status-bg", target: "statusBar", labelFa: "پس‌زمینه نوار وضعیت", labelEn: "Status Bar Background" },
+          { section: "workbench", key: "statusBar.foreground", css: "--vs-status-fg", target: "statusBar", labelFa: "متن نوار وضعیت", labelEn: "Status Bar Foreground" },
+          { section: "workbench", key: "statusBarItem.remoteBackground", css: "--vs-status-remote-bg", target: "statusRemote", labelFa: "پس‌زمینه بخش Remote", labelEn: "Remote Badge Background" },
+          { section: "workbench", key: "statusBarItem.remoteForeground", css: "--vs-status-remote-fg", target: "statusRemote", labelFa: "متن بخش Remote", labelEn: "Remote Badge Foreground" }
+        ]
+      }
+    ];
+
+    const I18N = {
+      fa: {
+        docTitle: "سازنده و ویرایشگر قالب رنگ VS Code",
+        appTitle: "ویرایشگر زنده قالب رنگ VS Code",
+        appSubtitle: "تغییر رنگ بخش‌های مختلف و کپی مستقیم تنظیمات در settings.json",
+        presetDarkPlus: "قالب آماده: Dark+ (پیش‌فرض تیره)",
+        presetTokyo: "قالب آماده: Tokyo Night",
+        presetDracula: "قالب آماده: Dracula",
+        presetMonokai: "قالب آماده: Monokai",
+        presetLightPlus: "قالب آماده: Light+ (روشن)",
+        resetBtn: "بازنشانی",
+        copyTopBtn: "کپی تنظیمات JSON",
+        searchPlaceholder: "جستجوی بخش یا کلید رنگ (مثلاً: sidebar, editor, string)...",
+        previewHint: "پیش‌نمایش زنده: با نگه داشتن موس روی هر تنظیم، بخش مربوطه روشن می‌شود و با کلیک روی هر قسمت از VS Code به تنظیم آن هدایت می‌شوید.",
+        exportTitle: "خروجی دقیق تنظیمات (settings.json)",
+        exportDesc: "پس از رضایت از رنگ‌بندی، این کد را کپی کرده و در فایل تنظیمات VS Code خود قرار دهید.",
+        innerOnlyLabel: "بدون آکولاد بیرونی (برای چسباندن در فایل دارای تنظیمات قبلی)",
+        copyBtn: "کپی در کلیپ‌بورد",
+        copiedToast: "تنظیمات با موفقیت در کلیپ‌بورد کپی شد!",
+        resetToast: "رنگ‌ها به قالب انتخاب‌شده بازنشانی شدند.",
+        howToGuide: '<strong>راهنمای اعمال در VS Code:</strong> کلیدهای <code>Ctrl + Shift + P</code> (یا در مک <code>Cmd + Shift + P</code>) را بزنید، عبارت <code>Preferences: Open User Settings (JSON)</code> را جستجو و انتخاب کنید، سپس کد بالا را در آن فایل جایگذاری (Paste) و ذخیره کنید.',
+        switchLangText: "English"
+      },
+      en: {
+        docTitle: "VS Code Live Theme Color Customizer",
+        appTitle: "VS Code Live Color Customizer",
+        appSubtitle: "Customize every UI & syntax color and copy directly into settings.json",
+        presetDarkPlus: "Preset: Dark+ (Default Dark)",
+        presetTokyo: "Preset: Tokyo Night",
+        presetDracula: "Preset: Dracula",
+        presetMonokai: "Preset: Monokai",
+        presetLightPlus: "Preset: Light+ (Light)",
+        resetBtn: "Reset",
+        copyTopBtn: "Copy JSON Settings",
+        searchPlaceholder: "Search setting or color key (e.g. sidebar, editor, string)...",
+        previewHint: "Live Preview: Hover any color option to highlight it in VS Code, or click any area inside the preview to jump to its setting.",
+        exportTitle: "Exact VS Code Settings Output (settings.json)",
+        exportDesc: "Once you like your theme, copy this JSON and paste it into your VS Code User Settings.",
+        innerOnlyLabel: "Without outer braces (for pasting into an existing settings.json)",
+        copyBtn: "Copy to Clipboard",
+        copiedToast: "Settings copied to clipboard!",
+        resetToast: "Colors reset to selected preset.",
+        howToGuide: '<strong>How to apply in VS Code:</strong> Press <code>Ctrl + Shift + P</code> (or <code>Cmd + Shift + P</code> on Mac), run <code>Preferences: Open User Settings (JSON)</code>, then paste and save the configuration above.',
+        switchLangText: "فارسی"
+      }
+    };
+
+    // Application State
+    let currentLang = "fa";
+    let currentPresetKey = "darkPlus";
+    let state = clonePreset("darkPlus");
+
+    function clonePreset(key) {
+      return JSON.parse(JSON.stringify(PRESETS[key]));
+    }
+
+    // Elements
+    const controlsContainer = document.getElementById("controlsContainer");
+    const jsonOutput = document.getElementById("jsonOutput");
+    const searchInput = document.getElementById("searchInput");
+    const presetSelect = document.getElementById("presetSelect");
+    const innerOnlyCheckbox = document.getElementById("innerOnlyCheckbox");
+    const langBtn = document.getElementById("langBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const copyJsonBtn = document.getElementById("copyJsonBtn");
+    const topCopyBtn = document.getElementById("topCopyBtn");
+    const toast = document.getElementById("toast");
+
+    // Helpers
+    function toColorInputHex(hex) {
+      if (!hex) return "#000000";
+      const clean = hex.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(clean)) return clean;
+      if (/^#[0-9a-fA-F]{8}$/.test(clean)) return clean.slice(0, 7);
+      if (/^#[0-9a-fA-F]{3}$/.test(clean)) {
+        return "#" + clean[1] + clean[1] + clean[2] + clean[2] + clean[3] + clean[3];
+      }
+      return "#000000";
+    }
+
+    function isValidHex(val) {
+      return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(val.trim());
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2400);
+    }
+
+    function applyAllCssVariables() {
+      const root = document.documentElement;
+      SCHEMA.forEach(group => {
+        group.items.forEach(item => {
+          const val = state[item.section][item.key];
+          if (val) {
+            root.style.setProperty(item.css, val);
+          }
+        });
+      });
+    }
+
+    function updateJsonOutput() {
+      const payload = {
+        "workbench.colorCustomizations": state.workbench,
+        "editor.tokenColorCustomizations": state.tokens
+      };
+      let formatted = JSON.stringify(payload, null, 2);
+      if (innerOnlyCheckbox.checked) {
+        const lines = formatted.split("\n");
+        formatted = lines.slice(1, -1).map(l => l.replace(/^  /, "")).join("\n");
+      }
+      jsonOutput.textContent = formatted;
+    }
+
+    function highlightPreviewTarget(targetName, active) {
+      const els = document.querySelectorAll(`[data-target="${targetName}"]`);
+      els.forEach(el => {
+        if (active) el.classList.add("target-highlight");
+        else el.classList.remove("target-highlight");
+      });
+    }
+
+    // Build Controls UI
+    function renderControls() {
+      const query = searchInput.value.trim().toLowerCase();
+      controlsContainer.innerHTML = "";
+
+      SCHEMA.forEach(group => {
+        const filteredItems = group.items.filter(item => {
+          if (!query) return true;
+          return (
+            item.key.toLowerCase().includes(query) ||
+            item.labelFa.toLowerCase().includes(query) ||
+            item.labelEn.toLowerCase().includes(query)
+          );
+        });
+
+        if (filteredItems.length === 0) return;
+
+        const card = document.createElement("div");
+        card.className = "group-card" + ((group.open || query) ? " open" : "");
+        card.dataset.groupId = group.id;
+
+        const headerBtn = document.createElement("button");
+        headerBtn.type = "button";
+        headerBtn.className = "group-header";
+        headerBtn.innerHTML = `
+          <span>${currentLang === "fa" ? group.titleFa : group.titleEn}</span>
+          <span class="chevron">▼</span>
+        `;
+        headerBtn.addEventListener("click", () => {
+          group.open = !group.open;
+          card.classList.toggle("open", group.open);
+        });
+
+        const body = document.createElement("div");
+        body.className = "group-body";
+
+        filteredItems.forEach(item => {
+          const val = state[item.section][item.key];
+          const row = document.createElement("div");
+          row.className = "color-row";
+          row.dataset.key = item.key;
+
+          row.addEventListener("mouseenter", () => highlightPreviewTarget(item.target, true));
+          row.addEventListener("mouseleave", () => highlightPreviewTarget(item.target, false));
+
+          const info = document.createElement("div");
+          info.className = "color-info";
+          info.innerHTML = `
+            <span class="color-label">${currentLang === "fa" ? item.labelFa : item.labelEn}</span>
+            <span class="color-key">${item.key}</span>
+          `;
+
+          const inputs = document.createElement("div");
+          inputs.className = "color-inputs";
+
+          const colorPicker = document.createElement("input");
+          colorPicker.type = "color";
+          colorPicker.className = "color-picker";
+          colorPicker.value = toColorInputHex(val);
+
+          const hexInput = document.createElement("input");
+          hexInput.type = "text";
+          hexInput.className = "hex-input";
+          hexInput.value = val;
+          hexInput.maxLength = 9;
+
+          colorPicker.addEventListener("input", e => {
+            const currentVal = state[item.section][item.key];
+            const alphaSuffix = /^#[0-9a-fA-F]{8}$/.test(currentVal) ? currentVal.slice(7) : "";
+            const nextHex = e.target.value + alphaSuffix;
+            state[item.section][item.key] = nextHex;
+            hexInput.value = nextHex;
+            document.documentElement.style.setProperty(item.css, nextHex);
+            updateJsonOutput();
+          });
+
+          hexInput.addEventListener("input", e => {
+            const typed = e.target.value.trim();
+            if (isValidHex(typed)) {
+              state[item.section][item.key] = typed;
+              colorPicker.value = toColorInputHex(typed);
+              document.documentElement.style.setProperty(item.css, typed);
+              updateJsonOutput();
+            }
+          });
+
+          hexInput.addEventListener("blur", () => {
+            hexInput.value = state[item.section][item.key];
+          });
+
+          inputs.appendChild(colorPicker);
+          inputs.appendChild(hexInput);
+          row.appendChild(info);
+          row.appendChild(inputs);
+          body.appendChild(row);
+        });
+
+        card.appendChild(headerBtn);
+        card.appendChild(body);
+        controlsContainer.appendChild(card);
+      });
+    }
+
+    // Click any element in VS Code Preview -> jump to its color setting
+    document.getElementById("vscodeWindow").addEventListener("click", e => {
+      const targetEl = e.target.closest("[data-focus-key]");
+      if (!targetEl) return;
+      e.stopPropagation();
+      const key = targetEl.dataset.focusKey;
+
+      // Find which group owns this key
+      const ownerGroup = SCHEMA.find(g => g.items.some(i => i.key === key));
+      if (ownerGroup) {
+        ownerGroup.open = true;
+        if (searchInput.value) {
+          searchInput.value = "";
+        }
+        renderControls();
+        const row = controlsContainer.querySelector(`.color-row[data-key="${key}"]`);
+        if (row) {
+          row.scrollIntoView({ behavior: "smooth", block: "center" });
+          row.classList.add("flash");
+          setTimeout(() => row.classList.remove("flash"), 1400);
+        }
+      }
+    });
+
+    // Apply language
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const htmlEl = document.documentElement;
+      htmlEl.lang = lang;
+      htmlEl.dir = lang === "fa" ? "rtl" : "ltr";
+
+      const t = I18N[lang];
+      document.title = t.docTitle;
+      searchInput.placeholder = t.searchPlaceholder;
+      langBtn.textContent = t.switchLangText;
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (t[key] !== undefined) {
+          if (key === "howToGuide") {
+            el.innerHTML = t[key];
+          } else {
+            el.textContent = t[key];
+          }
+        }
+      });
+
+      renderControls();
+    }
+
+    // Copy to clipboard
+    async function copySettings() {
+      const text = jsonOutput.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast(I18N[currentLang].copiedToast);
+      } catch (err) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+        showToast(I18N[currentLang].copiedToast);
+      }
+    }
+
+    // Events
+    searchInput.addEventListener("input", renderControls);
+    innerOnlyCheckbox.addEventListener("change", updateJsonOutput);
+
+    presetSelect.addEventListener("change", e => {
+      currentPresetKey = e.target.value;
+      state = clonePreset(currentPresetKey);
+      applyAllCssVariables();
+      renderControls();
+      updateJsonOutput();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      state = clonePreset(currentPresetKey);
+      applyAllCssVariables();
+      renderControls();
+      updateJsonOutput();
+      showToast(I18N[currentLang].resetToast);
+    });
+
+    langBtn.addEventListener("click", () => {
+      applyLanguage(currentLang === "fa" ? "en" : "fa");
+    });
+
+    copyJsonBtn.addEventListener("click", copySettings);
+    topCopyBtn.addEventListener("click", copySettings);
+
+    // Init
+    applyAllCssVariables();
+    applyLanguage("fa");
+    updateJsonOutput();
+  </script>
+</body>
+</html>
