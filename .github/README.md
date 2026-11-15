@@ -9,7 +9,6 @@ With this tool, you can color code your VS Code as you wish, and after you're do
 ## Usage
 <div align="center">
   <a href="https://ifekri.github.io/vscode-studio" title="vscode studio (designer)">
-  <img src=".github/screenshot-vscode-studio.png" alt="vscode designer screenshot" width="60%">
+  <img src="https://raw.githubusercontent.com/ifekri/vscode-studio/refs/heads/main/.github/screenshot-vscode-studio.png" alt="vscode designer screenshot" width="60%">
   </a>
 </div>
-
